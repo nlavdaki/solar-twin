@@ -1,0 +1,21 @@
+# Sweep grid + render settings. Copy to sweep.yaml and adjust.
+
+dataset:
+  timestamps_per_day: 9          # ~25k-40k obs target with 10 roofs x 3y x 12m x 10d
+  points_per_roof: 1
+  elevation_cutoff_deg: 5.0      # daylight filter; record sun_below_cutoff rather than drop
+
+dates:
+  years: [2023, 2024, 2025]
+  days_per_month: 10
+
+render:
+  mode: path_traced
+  samples_per_pixel: 256         # set to the convergence floor found in Sprint 0
+  denoiser: false                # OFF for absolute measurement
+  resolution: [1024, 1024]
+
+calibration:
+  framing: physical_efficacy     # or empirical_regression
+  expected_K_lm_per_w: [105, 120]
+  behavior_match_min: 0.90       # < 0.90 vs legacy -> circle back

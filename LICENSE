@@ -1,0 +1,33 @@
+MIT License
+
+Copyright (c) 2026 Nikolaos Lavdakis, Panagiotis Kosmopoulos, Ioannis Papoutsis
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+----------------------------------------------------------------------------
+NOTE ON DATA (not covered by this license):
+The third-party measurement data used to validate this software are NOT
+redistributed under this license and are NOT owned by the authors:
+  - Thissio actinometric pyranometer data: National Observatory of Athens (NOA).
+  - Thessaloniki (LAP/AUTh) pyranometer data: Laboratory of Atmospheric Physics,
+    Aristotle University of Thessaloniki, provided by Prof. A. Bais and Dr. K. Garane.
+  - CAMS McClear clear-sky irradiance: Copernicus Atmosphere Monitoring Service.
+These datasets are governed by their respective providers' terms. Do not
+redistribute them without permission from the data owners. See the Data
+Availability statement in the paper.
