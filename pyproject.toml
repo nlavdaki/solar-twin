@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "solar-twin"
+version = "0.0.1"
+description = "Per-location lux->GHI calibration from an Omniverse urban digital twin vs soda-pro CAMS"
+readme = "README.md"
+requires-python = ">=3.10"
+# Core (GPU-independent) deps only. Omniverse deps (omni.replicator.core, pxr, isaacsim)
+# are provided by the Isaac Sim / USD Composer runtime, NOT pip — see README.
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "pvlib>=0.10",
+    "pyarrow>=12.0",
+    "timezonefinder>=6.0",
+    "PyYAML>=6.0",
+    "openpyxl>=3.1",
+    "matplotlib>=3.7",
+    "contextily>=1.7.0",
+]
+
+# PEP 735 dependency groups — dev tools, never published, auto-installed by `uv run`.
+[dependency-groups]
+dev = ["pytest>=7", "ruff>=0.1"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.uv]
+# Omniverse deps (omni.replicator.core, pxr, isaacsim) come from the Isaac Sim /
+# USD Composer runtime, NOT from uv. capture.py / sweep.py / the probe run under
+# the Isaac Sim Python, not this uv environment. See README.
+package = true
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests", "scripts"]

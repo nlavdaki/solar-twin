@@ -1,0 +1,28 @@
+# Per-site configuration. Copy to sites.yaml and adjust.
+# illuminance_aov_id is resolved by scripts/probe_illuminance_aov.py (Step A).
+#
+# Reality (2026-05): USD projects already exist per location (old USD Composer
+# export); only temporal variance (sun per date/time) needs applying. Each
+# Location_*.csv is CAMS McClear clear-sky, 15-min, Wh/m^2, UT — its lat/lon/alt
+# live in the file header, so coordinates can be read from the CSV directly.
+
+illuminance_aov_id: "PtIlluminance"   # Step A confirmed (2026-05-31): float32 (H,W,4) absolute lux
+illuminance_channel: 0                 # confirm via capture.channel_report() on first run
+
+paths:
+  usd_root:  "C:/dev/solar-digital-twin-migration/01_old_composer_export"   # Location_A.usd ... Location_J.usd
+  cams_root: "data/cams"                                                      # Location_A.csv ... Location_J.csv
+
+# Sites A..J. lat/lon/alt are read from each CAMS header at load time unless
+# overridden here. Add the per-roof orthographic camera prim paths once known.
+sites:
+  - {site_id: Location_A, usd: "Location_A.usd", cams: "Location_A.csv", ortho_cameras: {}}
+  - {site_id: Location_B, usd: "Location_B.usd", cams: "Location_B.csv", ortho_cameras: {}}
+  - {site_id: Location_C, usd: "Location_C.usd", cams: "Location_C.csv", ortho_cameras: {}}
+  - {site_id: Location_D, usd: "Location_D.usd", cams: "Location_D.csv", ortho_cameras: {}}
+  - {site_id: Location_E, usd: "Location_E.usd", cams: "Location_E.csv", ortho_cameras: {}}
+  - {site_id: Location_F, usd: "Location_F.usd", cams: "Location_F.csv", ortho_cameras: {}}
+  - {site_id: Location_G, usd: "Location_G.usd", cams: "Location_G.csv", ortho_cameras: {}}
+  - {site_id: Location_H, usd: "Location_H.usd", cams: "Location_H.csv", ortho_cameras: {}}
+  - {site_id: Location_I, usd: "Location_I.usd", cams: "Location_I.csv", ortho_cameras: {}}
+  - {site_id: Location_J, usd: "Location_J.usd", cams: "Location_J.csv", ortho_cameras: {}}

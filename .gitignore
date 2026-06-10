@@ -1,0 +1,47 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# uv: commit uv.lock for reproducibility; ignore the managed venv only
+# (uv.lock is intentionally NOT ignored)
+
+# ---------------------------------------------------------------------------
+# DATA & OUTPUTS — keep CODE in VCS, not large/generated artifacts.
+# (Deprecated *scripts* in scripts/deprecated/ ARE tracked — provenance.)
+# ---------------------------------------------------------------------------
+# raw inputs
+data/cams/
+data/raw_GHI/
+data/raw_aov/
+data/pyranometer_GHI_ground_level/
+# generated intermediates & outputs
+data/lux_csv/
+data/extraction_schedule/
+data/dataset/
+data/results/
+data/reports/
+data/pyrano/
+# loose generated files
+*.parquet
+*.exr
+*.png
+pyranometer_thissio_*.csv
+thissio_clear_days_*.csv
+schedule_Location_*.csv
+lux_Location_*.csv
+convergence_table*.csv
+
+# local config (committed examples only)
+config/sites.yaml
+config/sweep.yaml
+
+# OS cruft
+.DS_Store
+Thumbs.db

@@ -1,0 +1,72 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite both the software and the paper."
+title: "solar-twin: RTX-rendered illuminance to calibrated GHI for urban digital twins"
+abstract: >-
+  A reproducible pipeline that extracts absolute illuminance from an NVIDIA Isaac Sim
+  RTX path-traced urban digital twin (PtIlluminance AOV) and calibrates it to global
+  horizontal irradiance (GHI) via a physically-structured beam/diffuse inverse model,
+  validated leave-location-out across 10 Athens rooftops and against an in-situ
+  Kipp & Zonen CMP21 pyranometer.
+type: software
+authors:
+  - family-names: Lavdakis
+    given-names: Nikolaos
+    # orcid: "https://orcid.org/0000-0000-0000-0000"   # TODO fill
+  - family-names: Kosmopoulos
+    given-names: Panagiotis
+  - family-names: Papoutsis
+    given-names: Ioannis
+version: "1.0.0"                 # TODO set release version/tag
+date-released: "2026-06-08"      # TODO set actual release date
+license: MIT                     # TODO confirm license (add a LICENSE file to match)
+repository-code: "https://github.com/<org>/solar-twin"   # TODO set public URL
+url: "https://github.com/<org>/solar-twin"               # TODO
+keywords:
+  - ray tracing
+  - urban digital twin
+  - physically based rendering
+  - solar irradiance
+  - illuminance calibration
+  - GPU rendering
+  - leave-location-out cross-validation
+  - CAMS McClear
+preferred-citation:
+  type: article
+  title: "RTX-Rendered Illuminance as a Calibrated Solar Irradiance Proxy: A Multi-Site Urban Digital Twin Study"
+  authors:
+    - family-names: Lavdakis
+      given-names: Nikolaos
+    - family-names: Kosmopoulos
+      given-names: Panagiotis
+    - family-names: Papoutsis
+      given-names: Ioannis
+  journal: "Computers & Graphics"   # TODO update on acceptance
+  year: 2026                        # TODO
+  # doi: "10.xxxx/xxxxx"            # TODO on publication
+references:
+  - type: article
+    title: "Ray-Tracing modeling for urban photovoltaic energy planning and management"
+    authors:
+      - family-names: Kosmopoulos
+        given-names: Panagiotis
+      - family-names: Dhake
+        given-names: Harshad
+      - family-names: Kartoudi
+        given-names: Dimitra
+      - family-names: Tsavalos
+        given-names: Antonios
+      - family-names: Koutsantoni
+        given-names: Panagiota
+      - family-names: Katranitsas
+        given-names: Asterios
+      - family-names: Lavdakis
+        given-names: Nikolaos
+      - family-names: Mengou
+        given-names: Eleni
+      - family-names: Kashyap
+        given-names: Yashwant
+    journal: "Applied Energy"
+    volume: 369
+    start: 123516
+    year: 2024
+    doi: "10.1016/j.apenergy.2024.123516"
