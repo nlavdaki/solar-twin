@@ -90,8 +90,10 @@ Each link in the chain was *validated*, not assumed:
   with **R² ≈ 0.98** across a summer and a winter day (Sprint-0), i.e. the twin's
   illuminance is a faithful proxy for the real resource. The apparent luminous
   efficacy (~33 lx·(W/m²)⁻¹ vs the ~110 of a horizontal surface) reflects the
-  roof-tilt-vs-horizontal geometry — exactly the per-location transfer the
-  calibration captures, not an error.
+  twin's MDL sky rendering ≈ 3.8–4.0× dim in absolute luminance — a *constant* the
+  calibration absorbs (effective efficacy × ≈3.9 ≈ 110 ≈ Perez 1990). Roof tilt is a
+  **secondary** per-location modulation, not the cause — exactly the per-location
+  transfer the calibration captures, not an error.
 
 **Success metrics for the calibration:** gate on **behavior-match R² ≥ 0.90**;
 report **RMSE and MBE (W/m²)** as the headline accuracy. The global transfer model
