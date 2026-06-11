@@ -304,7 +304,11 @@ Two findings: **(1) the twin matches CAMS (R² 0.983 = 0.983) and is markedly le
 (−2.8 vs CAMS's +20.2 W/m²); **(2) the Athens-trained global model, applied to a never-seen
 Thessaloniki rooftop, predicts GHI at R² 0.979** — a genuine **cross-city generalisation**
 result (the transfer arm that under-performs at Thissio works here because kd is treated
-consistently via Erbs at both train and test).
+consistently via Erbs at both train and test). **Tested directly (O11):** the Athens→Thissio
+physical transfer is R² **0.463** when fed Thissio's *measured* kd, rising to **0.809** when
+fed *Erbs* kd — confirming the kd-convention mismatch as the **dominant** cause; the residual
+gap to the held-out 0.937 (MBE +71 W/m²) is a Thissio-specific scale offset. ⚠️ **Do not
+generalise the cross-city transfer claim beyond Thessaloniki.**
 
 **Honest framing (do NOT overclaim).** This is a **second independent confirmation site +
 cross-city transfer**, *not* the "twin > CAMS on shaded surfaces" result. A bias-vs-geometry
