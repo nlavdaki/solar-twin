@@ -241,7 +241,7 @@ ROOF_PX_D = (739, 437)
 ROOF_PX_E = (547, 234)
 ROOF_PX_F = (659, 422)
 ROOF_PX_G = (875, 365)
-ROOF_PX_H = (270,222) old fail attempt (507, 498)
+ROOF_PX_H = (270, 222)   # re-picked 2026-06-09 (flat/sky-open); was (507, 498) tilted/shadowed
 ROOF_PX_I = (635, 355)
 ROOF_PX_J = (618,346) 
 ROOF_PX_Thissio = (509,258)  
@@ -301,7 +301,9 @@ deviation, if a faster re-run is ever needed.)
 ### Success metrics (calibration)
 Gate: **behavior-match R² ≥ 0.90**. Headline accuracy: **RMSE, MBE (W/m²)**. Global
 transfer model validated **leave-location-out** (train N−1 sites, predict an unseen
-site). Baseline to beat for pyranometer validation: prior-pipeline **R² = 0.97**.
+site). Pyranometer reference (Thissio, clear-sky, held-out): physical model **R² = 0.937**;
+CAMS McClear **R² = 0.972** (CAMS leads on this near-horizontal site, as expected). *(The
+old "R² = 0.97 baseline" was an in-sample HSV-pipeline figure — do not cite it.)*
 
 ---
 
@@ -313,7 +315,9 @@ per site, 2025 hourly clear-day geometry vs CAMS McClear). Result files in
 
 **Per-site calibration** (`calibration_export.json`, `lux_ghi_monolithic.csv`) — fit
 `GHI = a·lux + b` per location: R² **0.85–0.98**, luminous efficacy **27–35 lm/W**
-(tilted-roof regime, not the ~110 of a horizontal plane). 8 of 10 sites R² ≥ 0.95.
+(the twin's MDL sky renders ≈ 3.8–4.0× dim in absolute luminance — a *constant* the
+calibration absorbs; effective efficacy × ≈3.9 ≈ 110 lm/W ≈ Perez 1990 horizontal. Roof
+tilt is a **secondary** per-site modulation, not the cause). 8 of 10 sites R² ≥ 0.95.
 
 **Leave-location-out generalization** (`loo_validation.csv`) — train on 9 sites,
 predict the unseen 10th: **aggregate R² = 0.918, RMSE = 66 W/m², MBE ≈ 0, nRMSE = 11.7 %**

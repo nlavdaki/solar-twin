@@ -73,7 +73,7 @@ after its roof pixel was re-picked to a flat, sky-open patch (see §3.4).
 
 ### 3.2 Leave-location-out generalization — `[LOO_TABLE]`
 Source: `data/results/loo_validation.csv`. Train on 9 sites, predict the held-out 10th
-(elevation ≥ 10°). **This is the LINEAR baseline; the structured physical model (§3.6) lifts the full 10-site LOO to R² 0.963.**
+(elevation ≥ 10°). **This is the LINEAR baseline under the elevation ≥ 10° filter; the structured physical model (§3.6) lifts it to R² 0.952 under the SAME filter** (and to 0.963 on the all-daylight ablation set). ⚠️ **Do not mix filters:** 0.918→0.952 is the elevation ≥ 10° lift; 0.939→0.963 is the all-daylight lift.
 
 | Held-out site | n | RMSE (W/m²) | MBE (W/m²) | R² | nRMSE (%) |
 |------|-----|------|------|------|------|
@@ -92,7 +92,7 @@ Source: `data/results/loo_validation.csv`. Train on 9 sites, predict the held-ou
 The CSV also contains per-site elevation-bin strata [10–20°, 20–40°, >40°].
 After the H roof-pixel re-pick, **J is the sole outlier** (R² 0.713); H is now 0.890 (just
 under the linear 0.90 gate but a strong site). Excluding J, the nine other sites aggregate
-to ≈ R² 0.93 — report transparently; the physical model (§3.6) covers all 10 at R² 0.963.
+to ≈ R² 0.93 — report transparently; the physical model (§3.6) lifts this elevation-filtered aggregate to **R² 0.952** (and to 0.963 on the all-daylight set).
 
 ### 3.3 Luminous efficacy — `[EFFICACY_TABLE]`
 Source: `data/results/luminous_efficacy.csv` (+ `luminous_efficacy_scatter.png`).
@@ -185,7 +185,7 @@ is present it already captures the elevation dependence, so the explicit air-mas
 becomes redundant and the ground-reflection term is ~0 (parsimonious 2-parameter model).
 `kd` is from Erbs (1982) — no measured diffuse required — so this is fully reproducible.
 (A–J only, 10 sites, after H's roof pixel was re-picked clean on 2026-06-09 and **Thissio
-excluded** from the pool; linear LOO: ablation M0 = 0.939 (all-daylight) / loo_validation = 0.918 (elev ≥ 10°), both up from 0.893.)
+excluded** from the pool. Two filters, kept separate: **all-daylight** linear 0.939 → physical 0.963; **elevation ≥ 10°** linear 0.918 → physical 0.952. Both linear values are up from 0.893 pre-re-pick.)
 
 **Per-site leave-location-out (M2):** nine rooftops reach **R² 0.94–0.99** (A 0.988,
 B 0.973, C 0.983, D 0.987, E 0.988, F 0.982, G 0.967, **H 0.943**, I 0.978); only **J 0.839**
@@ -226,7 +226,7 @@ real sensor. (The stronger claim, twin > horizontal CAMS on *tilted/shadowed* ro
 **not** decided here because the Thissio pixel turned out near-horizontal, ≈ 11°; that
 claim is tested at the steep site H, §6.)
 
-**Site:** Thissio, Athens — 37.972°N, 23.7181°E, alt ~168 m.
+**Site:** Thissio, Athens — 37.972°N, 23.7181°E, alt **100 m** (the altitude used in the CAMS McClear request, and therefore the value of record; the geographic station elevation is higher, but McClear's altitude sensitivity is < 0.5 %/100 m and immaterial here).
 **Instrument:** Kipp & Zonen **CMP21** thermopile pyranometer — ISO 9060 **Secondary
 Standard** (the highest class); GHI in W/m²; spectral range 285–2800 nm; 180° field of view;
 response time < 5 s; range ≤ 4000 W/m²; operating −40…80 °C.
@@ -345,10 +345,10 @@ superiority is left to future work (a deliberately obstructed reference site).
 
 **Where the evidence stands.** The pipeline produces absolute, physically-validated lux
 that tracks CAMS clear-sky GHI with per-site R² 0.85–0.98 and **generalizes to unseen
-rooftops at R² 0.918 / nRMSE 11.7 % / ~0 bias** (linear leave-location-out). A
-physically-structured model lifts the global LOO to **R² 0.963** via a beam/diffuse
-decomposition (§3.6; the air-mass efficacy term alone already gives 0.950), with nine of
-ten sites at R² 0.94–0.99. Independently, against the **Thissio
+rooftops at R² 0.918 / nRMSE 11.7 % / ~0 bias** (linear leave-location-out, elevation ≥ 10°).
+A physically-structured beam/diffuse model lifts that same elevation-filtered LOO to **R² 0.952**,
+and the all-daylight LOO from 0.939 to **0.963** (§3.6; the air-mass efficacy term alone already
+gives 0.950), with nine of ten sites at R² 0.94–0.99. Independently, against the **Thissio
 pyranometer** the physical model reaches **R² 0.937 (RMSE 59, ~0 bias)** vs linear 0.867
 (§4.1) — ground-truth confirmation; a **second independent site (Thessaloniki, AUTh-LAP, a
 different city)** gives twin R² **0.983** (= CAMS, less biased) with the Athens model
