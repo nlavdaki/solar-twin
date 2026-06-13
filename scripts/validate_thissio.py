@@ -1,36 +1,30 @@
-r"""Thissio pyranometer validation — the ground-truth test, done properly (uv, GPU-free).
+r"""Validate twin-derived GHI against the Thissio in-situ pyranometer (uv, GPU-free).
 
-Compares twin-derived GHI against the in-situ pyranometer, THREE model arms +
-the CAMS baseline, clear-sky-filtered, elevation-stratified:
+Compares three model arms and the CAMS baseline on clear-sky, elevation-stratified
+rows:
 
-  (1) GLOBAL TRANSFER  — pooled A-J fit (from the monolithic dataset) applied to
-      Thissio UNSEEN. The real transfer-learning test: does a model built on other
-      rooftops predict a never-seen roof's measured GHI?
-  (2) THISSIO HELD-OUT — a Thissio-specific fit with k-fold CV (fit on some clear
-      days, predict the others). The upper bound: how well CAN this site calibrate?
-  (3) IN-SAMPLE (reference only) — Thissio fit on all its data, scored on the same.
-      Flatters; reported only as a ceiling, NOT a result.
-  (B) CAMS BASELINE   — CAMS McClear vs pyranometer (the bar to beat).
+  global_transfer   pooled A-J fit applied to Thissio (unseen-site transfer)
+  thissio_heldout    Thissio-specific k-fold fit (per-site calibration ceiling)
+  in_sample          Thissio fit and scored on the same rows (reference only)
+  cams_baseline      CAMS McClear vs the pyranometer
 
-CLEAR-SKY / BEAM-DOMINATED FILTER (twin is cloudless; pyranometer is all-sky):
-keep rows where the MEASURED diffuse fraction kd = DHI/GHI <= --kd-max (default
-0.25) and GHI > --ghi-min (default 50). kd is derived from the station's own
-global + diffuse pyranometers, so it is independent of CAMS and of the twin --
-the twin-vs-CAMS comparison stays non-circular. (Empirically this is the filter
-that tightens the lux->GHI relation at Thissio: it removes the high-diffuse,
-low-sun regime where the twin's clear-sky sky-dome diverges most from reality.)
-An optional CSR (measured/CAMS) window is available but OFF by default. Time
-base: pyranometer clock is fixed UTC+2 (no DST) -> UTC = clock - 2h.
+Clear-sky / beam-dominated filter: keep rows with measured diffuse fraction
+kd = DHI/GHI <= --kd-max (default 0.25) and GHI > --ghi-min (default 50). kd comes
+from the station's own global and diffuse pyranometers, so it is independent of
+CAMS and of the twin, keeping the twin-vs-CAMS comparison non-circular. It removes
+the high-diffuse, low-sun regime where the twin's clear-sky sky dome diverges most
+from reality. An optional measured/CAMS-ratio window is available but off by
+default. The pyranometer clock is fixed UTC+2 (no DST): UTC = clock - 2 h.
 
-Usage (uv):
+Usage:
   uv run python scripts/validate_thissio.py \
-    --lux       "…/data/lux_csv/lux_Location_Thissio.csv" \
-    --cams      "…/data/raw_GHI/Location_Thissio.csv" \
-    --pyrano-xlsx "…/data/pyranometer_GHI_ground_level/THISSIO-2020-2024_step-15min_FINAL.xlsx" \
-    --pooled    "…/data/dataset/lux_ghi_monolithic.csv" \
+    --lux data/lux_csv/lux_Location_Thissio.csv \
+    --cams data/raw_GHI/Location_Thissio.csv \
+    --pyrano-xlsx data/pyranometer_GHI_ground_level/THISSIO-2020-2024_step-15min_FINAL.xlsx \
+    --pooled data/dataset/lux_ghi_monolithic.csv \
     --lat 37.9717 --lon 23.7182 --alt 100 \
-    --out "…/data/results/thissio_validation_summary.csv" \
-    --scatter "…/data/results/thissio_validation_scatter.png"
+    --out data/results/thissio_validation_summary.csv \
+    --scatter data/results/figures/thissio_validation_scatter.png
 """
 from __future__ import annotations
 
@@ -293,16 +287,25 @@ def main():
             # aware) — this is the cited Thissio result (R² ≈ 0.937). Fall back to
             # the held-out linear arm only if the physical arm was not produced.
             if "pred_heldout_phys" in j.columns and j["pred_heldout_phys"].notna().any():
-                twin_pred = j.pred_heldout_phys; twin_label = "twin physical (held-out CV)"
+                twin_pred = j.pred_heldout_phys
             else:
-                twin_pred = j.pred_heldout; twin_label = "twin (held-out CV, linear)"
+                twin_pred = j.pred_heldout
+            def _r2q(y, pr):
+                y = np.asarray(y, float); pr = np.asarray(pr, float)
+                m = np.isfinite(y) & np.isfinite(pr); y, pr = y[m], pr[m]
+                ss = np.sum((y - pr) ** 2); tot = np.sum((y - y.mean()) ** 2)
+                return 1 - ss / tot if tot > 0 else float("nan")
+            _r2t = _r2q(meas, twin_pred); _r2c = _r2q(meas, j.cams); _n = int(np.isfinite(meas).sum())
             fig, ax = plt.subplots(figsize=(6, 6))
-            ax.scatter(meas, twin_pred, s=8, alpha=0.4, color="#1d9e75", label=twin_label)
-            ax.scatter(meas, j.cams, s=8, alpha=0.4, color="#d85a30", marker="^", label="CAMS")
+            ax.scatter(meas, twin_pred, s=8, alpha=0.4, color="#1d9e75",
+                       label=f"twin model (calibrated from rendered lux), $R^2$={_r2t:.3f}")
+            ax.scatter(meas, j.cams, s=8, alpha=0.4, color="#d85a30", marker="^",
+                       label=f"CAMS McClear (clear-sky model), $R^2$={_r2c:.3f}")
             lim = float(np.nanmax([meas.max(), twin_pred.max()])) * 1.05
-            ax.plot([0, lim], [0, lim], "k--", lw=1, label="1:1")
-            ax.set_xlabel("measured GHI — pyranometer (W/m²)"); ax.set_ylabel("predicted GHI (W/m²)")
-            ax.set_title("Thissio: twin physical (held-out CV) vs CAMS, clear-sky")
+            ax.plot([0, lim], [0, lim], "k--", lw=1, label="1:1 (perfect agreement)")
+            ax.set_xlabel("measured GHI — in-situ pyranometer (W/m²)  [ground truth]")
+            ax.set_ylabel("predicted GHI (W/m²)")
+            ax.set_title(f"Thissio — predicted vs. measured GHI (clear-sky, n={_n})")
             ax.legend(); fig.tight_layout(); fig.savefig(args.scatter, dpi=150)
             print(f"[wrote] {args.scatter}")
         except Exception as e:  # noqa: BLE001

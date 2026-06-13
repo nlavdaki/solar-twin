@@ -1,4 +1,4 @@
-"""Omniverse RTX absolute-illuminance (lux) capture — Step A CONFIRMED.
+"""Omniverse RTX absolute-illuminance (lux) capture.
 
 REQUIRES Isaac Sim / USD Composer + RTX GPU. This module's functions only run
 inside a live Isaac Sim app (launched via scripts/run_probe_standalone.py-style

@@ -1,6 +1,6 @@
-r"""Validate calibrated GHI against in-situ PYRANOMETER measurements (uv, GPU-free).
+r"""Validate calibrated GHI against in-situ pyranometer measurements (uv, GPU-free).
 
-The ultimate ground truth: model-predicted GHI vs a real pyranometer at a rooftop.
+Compares model-predicted GHI against a real pyranometer at a rooftop.
 Pyranometer data is not yet available — this scaffold is written + self-tested now
 so it's ready. A --self-test mode generates a synthetic pyranometer file from the
 model + Gaussian noise to confirm the pipeline runs.

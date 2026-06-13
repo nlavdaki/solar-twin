@@ -274,6 +274,24 @@ stamps that header itself.
 **Status:** P1 run (valid result below). P2 is a GUI script. P3/P4/P5 are GPU-free,
 run-tested on synthetic data; P5 has `--self-test`. `uv run pytest` stays at 34 passing.
 
+### Paper figures (uv, GPU-free)
+
+- `make_paper_figures.py` builds **F1** (per-site calibration), **F2** (leave-location-out,
+  all-daylight pooled, linear + physical panels), **F3** (per-site luminous efficacy —
+  per-sample strip + physical-scale axis + Perez 1990 reference line), **F4/F4b** (site map),
+  **F5** (convergence: lux error + render time vs totalSpp), **F6** (M0→M4 ablation), and
+  **F7** (false-colour lux map) from the result CSVs / monolithic dataset.
+- `validate_thissio.py` / `validate_site.py` emit the **pyranometer scatter** figures
+  (`--scatter`): x = measured GHI (in-situ pyranometer, ground truth), y = predicted GHI for
+  two arms — twin model (calibrated from rendered lux) and CAMS McClear — each with its R²
+  in the legend, plus the 1:1 line.
+- `make_j_occlusion_figure.py` assembles **F9b** — the Location-J inter-building occlusion
+  figure — from native Isaac `PtIlluminance` screenshots (`Location_J_YYYYMMDD_HH_MM.png`) at
+  the three low-sun outlier timestamps, with a shared `jet` 0–35 klux colour bar matching the
+  Isaac legend. Qualitative evidence that the twin resolves occlusion CAMS cannot (the J
+  scatter outliers are the shadowed-pixel days). The **F8** H shadow sweep is retained as the
+  diurnal-variation case.
+
 ### Convergence result (P1 v2, Location_A, summer noon, RTX 4070)
 The convergence knob is **`/rtx/pathtracing/totalSpp`** (default 512), **not**
 `rt_subframes`. Sweeping totalSpp (cold reset via `/rtx/resetPtAccumOnAnimTimeChange`)

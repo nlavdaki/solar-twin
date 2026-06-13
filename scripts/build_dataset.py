@@ -1,12 +1,12 @@
 r"""Assemble the monolithic dataset + per-location calibration models (uv env).
 
-GPU-free. Run AFTER the per-location extractions land. Scans the lux CSVs, joins
-each to its CAMS file on UTC instants, builds the one monolithic table (full
+GPU-free. Run after the per-location extractions are available. Scans the lux CSVs,
+joins each to its CAMS file on UTC instants, builds the monolithic table (full
 transfer-learning schema, daylight-filtered, QA-flagged), fits per-location
 lux->GHI models, scores the >=0.90 behavior-match gate, and writes the export JSON.
 
-Handles PARTIAL data: only locations that have BOTH a lux CSV and a CAMS file are
-processed, so you can run it after the first extraction and re-run as more land.
+Handles partial data: only locations with both a lux CSV and a CAMS file are
+processed, so it can be re-run as more extractions complete.
 
 Pairing by name: data/lux_csv/lux_Location_A.csv  <->  data/raw_GHI/Location_A.csv
 

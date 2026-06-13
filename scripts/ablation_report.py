@@ -1,21 +1,19 @@
-r"""Ablation + leave-location-out report for the physical calibration model.
+r"""Ablation and leave-location-out report for the physical calibration model.
 
-The paper's objectivity centerpiece: it shows each physical factor EARNING its
-place by the drop in leave-LOCATION-out error as features are added, from the
-constant-efficacy baseline (the old GHI=a*lux+b) to the full beam/diffuse model.
+Reports the change in leave-location-out error as physical terms are added, from
+the constant-efficacy baseline to the full beam/diffuse model:
 
-  M0  GHI = a*lux + b                 (constant efficacy -- current model)
+  M0  GHI = a*lux + b                 (constant efficacy)
   M1  + air-mass luminous efficacy
   M2  + beam/diffuse split (kd, AOI, SVF)
   M3  + air-mass on the beam stream
   M4  + ground reflection
 
-kd is taken from a measured 'kd' column if present, else derived from GHI +
+kd is read from a measured 'kd' column if present, otherwise derived from GHI and
 geometry via Erbs (1982). Per-site geometry (tilt/SVF/horizon) is loaded from
-geometry_<site>.json files when available; missing sites default to
-horizontal-open (still diffuse- and air-mass-aware).
+geometry_<site>.json when available; missing sites default to horizontal-open.
 
-Usage (uv):
+Usage:
   uv run python scripts/ablation_report.py \
     --pooled "…/data/dataset/lux_ghi_monolithic.csv" \
     --geometry-dir "…/data/geometry" \

@@ -1,13 +1,11 @@
-r"""Per-location luminous efficacy (lux/GHI) summary + scatter, for the paper.
+r"""Per-location luminous efficacy (lux/GHI) summary and scatter (uv, GPU-free).
 
-GPU-free (uv). Run after build_dataset.py. Efficacy = lux/GHI (lm/W). Expected
-~33 lm/W (tilted roof, not the ~110 of a horizontal surface). A site near ~110
-is approximately horizontal — flag it (changes the physics interpretation).
-Cross-site variation is the evidence that per-location calibration is needed.
+Efficacy = lux / GHI (lm/W), computed per site from the monolithic dataset. Twin-scale
+values are about 27-33 lm/W; a site near ~110 lm/W is approximately horizontal, which
+changes the physical interpretation. Cross-site variation motivates per-location
+calibration. Low-flux rows are dropped (GHI > 50 W/m^2 and solar elevation > 10 deg).
 
-Filters (avoid noise at low flux): GHI > 50 W/m^2 AND solar_elevation > 10 deg.
-
-Usage (uv):
+Usage:
     uv run python scripts/luminous_efficacy.py \
       --dataset "…/data/dataset/lux_ghi_monolithic.csv" \
       --out "…/data/results/luminous_efficacy.csv" \

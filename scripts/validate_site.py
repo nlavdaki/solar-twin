@@ -1,21 +1,20 @@
-r"""Generalised pyranometer validation for ANY site (Thissio, Thessaloniki, ...).
+r"""Site-agnostic pyranometer validation (Thissio, Thessaloniki, ...) (uv, GPU-free).
 
-A site-agnostic version of validate_thissio.py. Reads the in-situ pyranometer from
-either a tidy UTC CSV (e.g. the AUTh-LAP Thessaloniki record from
-read_pyranometer_lap.py: timestamp_utc;sza_deg;ghi_wm2;...) or the Thissio XLSX
-(TOTAL/DIFFUSE), aligns to CAMS McClear, optionally to the twin lux, applies a
-clear-sky filter, and reports the arms:
+A generalised version of validate_thissio.py. Reads the in-situ pyranometer from
+either a UTC CSV (e.g. the AUTh-LAP Thessaloniki record from read_pyranometer_lap.py:
+timestamp_utc;sza_deg;ghi_wm2;...) or the Thissio XLSX (TOTAL/DIFFUSE), aligns it to
+CAMS McClear and optionally to the twin lux, applies a clear-sky filter, and reports:
 
-  cams_baseline        CAMS McClear vs pyranometer (always; the bar to beat)
-  global_transfer      pooled A-J LINEAR fit, applied to this site unseen      (needs --lux + --pooled)
-  global_transfer_phys pooled A-J PHYSICAL fit (Erbs kd), applied unseen       (needs --lux + --pooled)
-  thissio_heldout*     k-fold linear / physical on this site                  (needs --lux)
+  cams_baseline        CAMS McClear vs pyranometer (always)
+  global_transfer      pooled A-J linear fit, applied to this site unseen   (needs --lux + --pooled)
+  global_transfer_phys pooled A-J physical fit (Erbs kd), applied unseen    (needs --lux + --pooled)
+  heldout_*            k-fold linear / physical on this site                (needs --lux)
 
-Clock: pyranometer timestamps are made UTC via --clock-offset-h (0 for the LAP
-'TIME_UT' record; 2 for the Thissio EET clock). Diffuse fraction kd: MEASURED if
-the pyranometer has a diffuse channel (Thissio), else MODELLED with Erbs (1982)
-from GHI + geometry (Thessaloniki is global-only). Clear-sky selection: measured
-kd<=--kd-max where available, else restrict to --clear-days (the classifier output).
+Clock: pyranometer timestamps are converted to UTC via --clock-offset-h (0 for the
+LAP TIME_UT record; 2 for the Thissio EET clock). Diffuse fraction kd is measured
+where a diffuse channel exists (Thissio), otherwise modelled with Erbs (1982) from
+GHI and geometry (Thessaloniki is global-only). Clear-sky selection uses measured
+kd <= --kd-max where available, else the --clear-days classifier output.
 
 Usage (Thessaloniki, CAMS-only until twin lux exists):
   uv run python scripts/validate_site.py --site Thessaloniki \
@@ -196,13 +195,23 @@ def main():
     if args.scatter and "heldout_physical" in arms:
         try:
             import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
+            def _r2q(y, pr):
+                y = np.asarray(y, float); pr = np.asarray(pr, float)
+                m = np.isfinite(y) & np.isfinite(pr); y, pr = y[m], pr[m]
+                ss = np.sum((y - pr) ** 2); tot = np.sum((y - y.mean()) ** 2)
+                return 1 - ss / tot if tot > 0 else float("nan")
+            _r2t = _r2q(meas, arms["heldout_physical"]); _r2c = _r2q(meas, arms["cams_baseline"])
+            _n = int(np.isfinite(meas).sum())
             fig, ax = plt.subplots(figsize=(6, 6))
-            ax.scatter(meas, arms["heldout_physical"], s=8, alpha=0.4, color="#1d9e75", label="twin physical")
-            ax.scatter(meas, arms["cams_baseline"], s=8, alpha=0.4, color="#d85a30", marker="^", label="CAMS")
+            ax.scatter(meas, arms["heldout_physical"], s=8, alpha=0.4, color="#1d9e75",
+                       label=f"twin model (calibrated from rendered lux), $R^2$={_r2t:.3f}")
+            ax.scatter(meas, arms["cams_baseline"], s=8, alpha=0.4, color="#d85a30", marker="^",
+                       label=f"CAMS McClear (clear-sky model), $R^2$={_r2c:.3f}")
             lim = float(np.nanmax([meas.max(), np.nanmax(arms["cams_baseline"])])) * 1.05
-            ax.plot([0, lim], [0, lim], "k--", lw=1)
-            ax.set_xlabel("measured GHI (W/m²)"); ax.set_ylabel("predicted GHI (W/m²)")
-            ax.set_title(f"{args.site}: twin vs CAMS, clear-sky"); ax.legend()
+            ax.plot([0, lim], [0, lim], "k--", lw=1, label="1:1 (perfect agreement)")
+            ax.set_xlabel("measured GHI — in-situ pyranometer (W/m²)  [ground truth]")
+            ax.set_ylabel("predicted GHI (W/m²)")
+            ax.set_title(f"{args.site} — predicted vs. measured GHI (clear-sky, n={_n})"); ax.legend()
             fig.tight_layout(); fig.savefig(args.scatter, dpi=150)
             print(f"[wrote] {args.scatter}")
         except Exception as e:  # noqa: BLE001

@@ -1,20 +1,18 @@
 r"""Publication figures for the Computers & Graphics submission (uv, matplotlib).
 
-Generates 300-dpi PNG + PDF figures from the result files. Each figure is
-independent and skips cleanly if its input is missing, so you can run it as data
-lands. Most figures derive from the monolithic dataset (so they need no special
-result format); convergence and ablation read their CSVs.
+Writes 300-dpi PNG + PDF figures from the result files; each figure skips cleanly
+if its input is missing. Most derive from the monolithic dataset; convergence and
+ablation read their own CSVs.
 
 Figures:
-  F1 calibration_scatter   - lux vs GHI per site (2x5 grid) + fit + R^2
-  F2 loo_pred_vs_obs       - leave-location-out predicted vs observed GHI,
-                             coloured by site; LINEAR and PHYSICAL panels
-  F3 luminous_efficacy     - per-site efficacy mean +/- std (lm/W)
-  F4 site_map              - the 10 rooftops on a lon/lat map, coloured by R^2
-  F5 convergence           - totalSpp vs relative lux error + render time
-  F6 ablation              - M0..M4 leave-location-out R^2 / RMSE
+  F1 calibration_scatter   per-site lux vs GHI (2x5 grid) + fit + R^2
+  F2 loo_pred_vs_obs       leave-location-out predicted vs observed GHI (linear + physical)
+  F3 luminous_efficacy     per-site efficacy, per-sample strip + physical-scale axis
+  F4 site_map              the 10 rooftops on a lon/lat map, coloured by R^2
+  F5 convergence           relative lux error and render time vs totalSpp
+  F6 ablation              M0-M4 leave-location-out R^2 / RMSE
 
-Usage (uv):
+Usage:
   uv run python scripts/make_paper_figures.py \
     --pooled "…/data/dataset/lux_ghi_monolithic.csv" \
     --convergence "…/data/results/convergence_table_spp.csv" \
@@ -128,7 +126,8 @@ def fig_loo(df, out_dir):
         ax.set_xlabel("observed GHI (W/m²)"); ax.set_ylabel("predicted GHI (W/m²)")
         ax.set_title(f"{title}\n$R^2$={_r2(ghi[np.isfinite(pred)], pred[np.isfinite(pred)]):.3f}")
     axes[1].legend(title="site", ncol=2, fontsize=7, loc="lower right")
-    fig.suptitle("Leave-location-out cross-validation (predict an unseen rooftop)", y=1.02)
+    fig.suptitle("Leave-location-out cross-validation — all-daylight pooled "
+                 f"(n={len(d)}); stricter elevation $\\geq$10° gives 0.918 / 0.952", y=1.02)
     fig.tight_layout()
     _save(fig, out_dir, "F2_loo_pred_vs_obs"); plt.close(fig)
 
@@ -136,17 +135,36 @@ def fig_loo(df, out_dir):
 # ----------------------------------------------------------------- F3 efficacy
 def fig_efficacy(df, out_dir):
     import matplotlib.pyplot as plt
+    SCALE, PEREZ = 3.8, 110.0      # twin->physical scale; Perez 1990 horizontal reference
     d = df[(df.ghi > 50) & (df.get("solar_elevation_deg", 90) > 10)].copy()
     d["eff"] = d.lux / d.ghi
     sites = sorted(d.location_id.unique())
-    means = [d[d.location_id == s].eff.mean() for s in sites]
-    stds = [d[d.location_id == s].eff.std() for s in sites]
-    fig, ax = plt.subplots(figsize=(7, 4))
+    labels = [str(s).replace("Location_", "") for s in sites]
     x = np.arange(len(sites))
-    ax.bar(x, means, yerr=stds, capsize=3, color="#0072B2", alpha=0.85)
-    ax.set_xticks(x); ax.set_xticklabels([str(s).replace("Location_", "") for s in sites])
-    ax.set_ylabel("luminous efficacy  lux/(W/m²)")
-    ax.set_title("Per-site effective luminous efficacy (twin scale; ×3.8 ≈ 110 physical)")
+    means = np.array([d[d.location_id == s].eff.mean() for s in sites])
+    stds = np.array([d[d.location_id == s].eff.std() for s in sites])
+    fig, ax = plt.subplots(figsize=(9.2, 5.2)); ax.set_axisbelow(True)
+    ax.bar(x, means, width=0.66, color="#0072B2", alpha=0.45, edgecolor="#0072B2", linewidth=0.8, zorder=2)
+    rng = np.random.default_rng(0)                       # per-sample strip (within-site spread)
+    for i, s in enumerate(sites):
+        e = d[d.location_id == s].eff.to_numpy()
+        jx = i + (rng.random(len(e)) - 0.5) * 0.34
+        ax.scatter(jx, e, s=4, alpha=0.10, color="#0b3d63", edgecolors="none", zorder=3, rasterized=True)
+    ax.errorbar(x, means, yerr=stds, fmt="o", ms=4, color="black", ecolor="black",
+                elinewidth=1.2, capsize=4, capthick=1.2, zorder=5)          # mean +/- 1 SD
+    ax.set_xticks(x); ax.set_xticklabels(labels); ax.set_xlabel("rooftop site")
+    ax.set_ylabel(r"effective luminous efficacy — twin scale  [lux/(W/m$^2$)]")
+    ax.set_ylim(0, max(d.eff.quantile(0.999), means.max() + stds.max()) * 1.04)
+    ax.set_xlim(-0.7, len(sites) - 0.3)
+    ax2 = ax.twinx(); ax2.set_ylim(np.array(ax.get_ylim()) * SCALE); ax2.grid(False)
+    ax2.spines["top"].set_visible(False)
+    ax2.set_ylabel(r"physical luminous efficacy  [lm/W]  (= twin $\times\,3.8$)")
+    ax2.axhline(PEREZ, ls="--", lw=1.3, color="#D55E00", zorder=4)
+    ax2.annotate(f"Perez (1990) horizontal $\\approx$ {PEREZ:.0f} lm/W", xy=(len(sites) - 1.0, PEREZ),
+                 xytext=(0, 6), textcoords="offset points", ha="right", va="bottom",
+                 color="#D55E00", fontsize=9)
+    ax.set_title(r"Per-site effective luminous efficacy (twin scale; $\times\,3.8 \approx 110$ lm/W physical). "
+                 "\nError bars = $\\pm$1 SD of per-sample efficacy.")
     fig.tight_layout(); _save(fig, out_dir, "F3_luminous_efficacy"); plt.close(fig)
 
 
@@ -235,22 +253,33 @@ def fig_convergence(path, out_dir):
     luxcol = next((cols[c] for c in cols if "lux" in c and "mean" in c), None) or \
              next((cols[c] for c in cols if "lux" in c), None)
     devcol = next((cols[c] for c in cols if "dev" in c or "rel" in c or "err" in c), None)
-    tcol = next((cols[c] for c in cols if "time" in c or "sec" in c or "_s" in c), None)
-    fig, ax = plt.subplots(figsize=(6.5, 4))
+    # render-time column: must match the time column, NOT 'total_spp' (which also
+    # contains '_s') and NOT the 'std_render_s' spread column.
+    tcol = next((cols[c] for c in cols if ("render" in c or "time" in c) and "std" not in c), None)
+    fig, ax = plt.subplots(figsize=(6.6, 4.1))
     if devcol:
         dev = df[devcol].to_numpy(float)
     elif luxcol:
         lux = df[luxcol].to_numpy(float); dev = np.abs(lux - lux[-1]) / lux[-1] * 100
     else:
         print("[fig] convergence skipped: no lux/dev column"); plt.close(fig); return
-    ax.plot(spp, dev, "o-", color="#0072B2", label="relative lux error")
-    ax.axhline(1.0, color="grey", ls=":", lw=1); ax.set_xscale("log", base=2)
+    l1, = ax.plot(spp, dev, "o-", color="#0072B2", label="relative lux error (%)")
+    ax.axhline(0.02, color="grey", ls=":", lw=1); ax.set_xscale("log", base=2)
+    ax.set_xticks(spp); ax.set_xticklabels([int(s) for s in spp])
     ax.set_xlabel("path-traced samples per pixel (totalSpp)")
-    ax.set_ylabel("relative lux error (%)", color="#0072B2")
+    ax.set_ylabel("relative lux error (%)", color="#0072B2"); ax.tick_params(axis="y", labelcolor="#0072B2")
+    handles = [l1]
     if tcol:
-        ax2 = ax.twinx(); ax2.plot(spp, df[tcol].to_numpy(float), "s--", color="#D55E00")
-        ax2.set_ylabel("render time / frame (s)", color="#D55E00"); ax2.grid(False)
-    ax.set_title("Path-tracing convergence (knee ≈ 64 spp)")
+        ax2 = ax.twinx(); ax2.grid(False); ax2.spines["top"].set_visible(False)
+        rt = df[tcol].to_numpy(float)
+        l2, = ax2.plot(spp, rt, "s--", color="#D55E00", label="render time / frame (s)")
+        ax2.set_ylabel("render time / frame (s)", color="#D55E00"); ax2.tick_params(axis="y", labelcolor="#D55E00")
+        ax2.set_ylim(0, rt.max() * 1.12); handles.append(l2)
+    for sx, tag in [(16, "knee"), (64, "converged")]:
+        ax.axvline(sx, color="grey", ls="--", lw=0.8, alpha=0.6)
+        ax.annotate(tag, xy=(sx, ax.get_ylim()[1] * 0.92), fontsize=8, ha="center", color="grey")
+    ax.set_title("Path-tracing convergence: lux error and render time vs totalSpp")
+    ax.legend(handles=handles, loc="upper center", fontsize=9, frameon=True)
     fig.tight_layout(); _save(fig, out_dir, "F5_convergence"); plt.close(fig)
 
 

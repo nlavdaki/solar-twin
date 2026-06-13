@@ -1,22 +1,21 @@
-r"""Leave-location-out cross-validation of the global synthetic->real calibration.
+r"""Leave-location-out cross-validation of the global lux->GHI calibration (uv, GPU-free).
 
-GPU-free (uv). Run AFTER build_dataset.py has produced the monolithic dataset for
-all 10 sites. Tests whether a calibration trained on N-1 sites predicts GHI on a
-held-out site it never saw — the real test of synthetic->real transfer.
+Tests whether a calibration trained on N-1 sites predicts GHI on a held-out site.
+Requires the monolithic dataset from build_dataset.py.
 
 Protocol (per held-out site i):
-  train = rows where location_id != i ; test = rows where location_id == i
-  fit GHI = a*lux + b on train (same OLS as calibrate.fit_location)
+  train = rows where location_id != i; test = rows where location_id == i
+  fit GHI = a*lux + b on train (OLS, as in calibrate.fit_location)
   predict on test; metrics: RMSE, MBE, R2, nRMSE (% of mean measured GHI)
-  also stratified by solar-elevation bin [10-20), [20-40), [40+); elev<10 excluded
-Aggregate row = sample-count-weighted mean of per-site metrics.
+  stratified by solar-elevation bin [10-20), [20-40), [40+); elev < 10 excluded
+The aggregate row is the sample-count-weighted mean of the per-site metrics.
 
-Usage (uv):
+Usage:
     uv run python scripts/loo_validation.py \
-      --dataset "…/data/dataset/lux_ghi_monolithic.csv" \
-      --out "…/data/results/loo_validation.csv"
+      --dataset data/dataset/lux_ghi_monolithic.csv \
+      --out data/results/loo_validation.csv
 
-HARDWARE/date stamped in the CSV header.
+Hardware and date are stamped in the CSV header.
 """
 from __future__ import annotations
 

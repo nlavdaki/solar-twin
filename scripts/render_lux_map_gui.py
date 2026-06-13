@@ -1,4 +1,4 @@
-r"""Capture a full-frame false-colour ILLUMINANCE MAP for the C&G hero figure.
+r"""Capture a full-frame false-colour illuminance map (lux) for a publication figure.
 
 Run in full Isaac (GUI Script Editor) with Location_<X>.usd open, RTX Interactive
 Path Tracing, and the viewport framed how you want the figure (top-down or
